@@ -17,7 +17,7 @@ module Run.Reader
 import Prelude
 
 import Data.Either (Either(..))
-import Data.Symbol (class IsSymbol)
+import Data.Symbol (class IsSymbol, reflectSymbol)
 import Prim.Row as Row
 import Run (Run)
 import Run as Run
@@ -96,6 +96,13 @@ localAt sym = \f r -> map f (askAt sym) >>= flip runLocal r
 runReader :: forall e a r. e -> Run (READER e + r) a -> Run r a
 runReader = runReaderAt _reader
 
+foreign import runReaderAtImpl
+  :: forall t e a r
+   . String
+  -> e
+  -> Run r a
+  -> Run t a
+
 runReaderAt
   :: forall t e a r s
    . IsSymbol s
@@ -104,14 +111,4 @@ runReaderAt
   -> e
   -> Run r a
   -> Run t a
-runReaderAt sym = loop
-  where
-  handle = Run.on sym Left Right
-  loop e r = case Run.peel r of
-    Left a -> case handle a of
-      Left (Reader k) ->
-        loop e (k e)
-      Right a' ->
-        Run.send a' >>= runReaderAt sym e
-    Right a ->
-      pure a
+runReaderAt sym e r = runReaderAtImpl (reflectSymbol sym) e r

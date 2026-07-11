@@ -23,7 +23,7 @@ module Run.State
 import Prelude
 
 import Data.Either (Either(..))
-import Data.Symbol (class IsSymbol)
+import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple(..), fst, snd)
 import Prim.Row as Row
 import Run (Run)
@@ -99,6 +99,13 @@ getsAt
   -> Run r t
 getsAt sym = flip map (getAt sym)
 
+foreign import runStateAtImpl
+  :: forall q s r a
+   . String
+  -> s
+  -> Run r a
+  -> Run q (Tuple s a)
+
 runState :: forall s r a. s -> Run (STATE s + r) a -> Run r (Tuple s a)
 runState = runStateAt _state
 
@@ -110,20 +117,7 @@ runStateAt
   -> s
   -> Run r a
   -> Run q (Tuple s a)
-runStateAt sym = loop
-  where
-  handle = Run.on sym Left Right
-  loop s r = case Run.peel r of
-    Left a -> case handle a of
-      Left (State t k) ->
-        let
-          s' = t s
-        in
-          loop s' (k s')
-      Right a' ->
-        Run.send a' >>= runStateAt sym s
-    Right a ->
-      pure (Tuple s a)
+runStateAt sym s r = runStateAtImpl (reflectSymbol sym) s r
 
 evalState :: forall s r a. s -> Run (STATE s + r) a -> Run r a
 evalState = evalStateAt _state

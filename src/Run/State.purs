@@ -28,6 +28,9 @@ import Data.Tuple (Tuple(..), fst, snd)
 import Prim.Row as Row
 import Run (Run)
 import Run as Run
+import Control.Monad.Free (Free)
+import Control.Monad.Free as Free
+import Data.Functor.Variant (VariantF)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
@@ -101,7 +104,13 @@ getsAt sym = flip map (getAt sym)
 
 foreign import runStateAtImpl
   :: forall q s r a
-   . String
+   . Free.BindNodeClass
+  -> Free.BindLeafClass
+  -> Free.FreeObjClass
+  -> (forall f x y. Free f x -> (x -> Free f y) -> Free f y)
+  -> (forall rl x y. (x -> y) -> VariantF rl x -> VariantF rl y)
+  -> (s -> a -> Tuple s a)
+  -> String
   -> s
   -> Run r a
   -> Run q (Tuple s a)
@@ -117,7 +126,14 @@ runStateAt
   -> s
   -> Run r a
   -> Run q (Tuple s a)
-runStateAt sym s r = runStateAtImpl (reflectSymbol sym) s r
+runStateAt sym s r = runStateAtImpl
+  Free.bindNodeClass
+  Free.bindLeafClass
+  Free.freeObjClass
+  Free.bindImpl
+  map
+  Tuple
+  (reflectSymbol sym) s r
 
 evalState :: forall s r a. s -> Run (STATE s + r) a -> Run r a
 evalState = evalStateAt _state

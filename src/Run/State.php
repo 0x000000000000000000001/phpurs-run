@@ -2,19 +2,15 @@
 
 $exports = [];
 
-$_runStateAtImpl = function($symStr, $s = null, $r = null) use (&$_runStateAtImpl) {
-    if (func_num_args() < 3) {
+$_runStateAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeObjClass = null, $bindImpl = null, $mapVariantF = null, $Tuple = null, $symStr = null, $s = null, $r = null) use (&$_runStateAtImpl) {
+    if (func_num_args() < 9) {
         $__args = func_get_args();
         return function(...$more) use ($__args, &$_runStateAtImpl) {
             return $_runStateAtImpl(...array_merge($__args, $more));
         };
     }
     
-    $runStateAtClosure = function($s_inner, $r_inner) use (&$runStateAtClosure, $symStr) {
-        $bindNodeClass = \Control\Monad\Free\BindNode::class;
-        $bindLeafClass = \Control\Monad\Free\BindLeaf::class;
-        $freeObjClass = \Control\Monad\Free\FreeObj::class;
-        $Tuple = (array_key_exists('Data_Tuple_Tuple', $GLOBALS) ? $GLOBALS['Data_Tuple_Tuple'] : \Data\Tuple\phpurs_eval_thunk('Data_Tuple_Tuple'));
+    $runStateAtClosure = function($s_inner, $r_inner) use (&$runStateAtClosure, $symStr, $bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF, $Tuple) {
 
         $f = $r_inner;
         while (true) {
@@ -71,8 +67,6 @@ $_runStateAtImpl = function($symStr, $s = null, $r = null) use (&$_runStateAtImp
                     $f = new $freeObjClass(0, $b, $f->binds);
                 } else {
                     // Another effect
-                    $mapVariantF = ((array_key_exists('Data_Functor_Variant_functorVariantF', $GLOBALS) ? $GLOBALS['Data_Functor_Variant_functorVariantF'] : \Data\Functor\Variant\phpurs_eval_thunk('Data_Functor_Variant_functorVariantF')))->map;
-                    $bindImpl = (array_key_exists('Control_Monad_Free_bindImpl', $GLOBALS) ? $GLOBALS['Control_Monad_Free_bindImpl'] : \Control\Monad\Free\phpurs_eval_thunk('Control_Monad_Free_bindImpl'));
                     
                     $binds = $f->binds;
                     $cont = function($b) use ($freeObjClass, $binds) {

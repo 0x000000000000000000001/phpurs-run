@@ -21,6 +21,9 @@ import Data.Symbol (class IsSymbol, reflectSymbol)
 import Prim.Row as Row
 import Run (Run)
 import Run as Run
+import Control.Monad.Free (Free)
+import Control.Monad.Free as Free
+import Data.Functor.Variant (VariantF)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
@@ -98,7 +101,12 @@ runReader = runReaderAt _reader
 
 foreign import runReaderAtImpl
   :: forall t e a r
-   . String
+   . Free.BindNodeClass
+  -> Free.BindLeafClass
+  -> Free.FreeObjClass
+  -> (forall f x y. Free f x -> (x -> Free f y) -> Free f y)
+  -> (forall rl x y. (x -> y) -> VariantF rl x -> VariantF rl y)
+  -> String
   -> e
   -> Run r a
   -> Run t a
@@ -111,4 +119,10 @@ runReaderAt
   -> e
   -> Run r a
   -> Run t a
-runReaderAt sym e r = runReaderAtImpl (reflectSymbol sym) e r
+runReaderAt sym e r = runReaderAtImpl
+  Free.bindNodeClass
+  Free.bindLeafClass
+  Free.freeObjClass
+  Free.bindImpl
+  map
+  (reflectSymbol sym) e r

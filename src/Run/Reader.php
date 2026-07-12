@@ -2,18 +2,15 @@
 
 $exports = [];
 
-$_runReaderAtImpl = function($symStr, $e = null, $r = null) use (&$_runReaderAtImpl) {
-    if (func_num_args() < 3) {
+$_runReaderAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeObjClass = null, $bindImpl = null, $mapVariantF = null, $symStr = null, $e = null, $r = null) use (&$_runReaderAtImpl) {
+    if (func_num_args() < 8) {
         $__args = func_get_args();
         return function(...$more) use ($__args, &$_runReaderAtImpl) {
             return $_runReaderAtImpl(...array_merge($__args, $more));
         };
     }
     
-    $runReaderAtClosure = function($e_inner, $r_inner) use (&$runReaderAtClosure, $symStr) {
-        $bindNodeClass = \Control\Monad\Free\BindNode::class;
-        $bindLeafClass = \Control\Monad\Free\BindLeaf::class;
-        $freeObjClass = \Control\Monad\Free\FreeObj::class;
+    $runReaderAtClosure = function($e_inner, $r_inner) use (&$runReaderAtClosure, $symStr, $bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF) {
 
         $f = $r_inner;
         while (true) {
@@ -67,8 +64,6 @@ $_runReaderAtImpl = function($symStr, $e = null, $r = null) use (&$_runReaderAtI
                     $f = new $freeObjClass(0, $b, $f->binds);
                 } else {
                     // Another effect
-                    $mapVariantF = ((array_key_exists('Data_Functor_Variant_functorVariantF', $GLOBALS) ? $GLOBALS['Data_Functor_Variant_functorVariantF'] : \Data\Functor\Variant\phpurs_eval_thunk('Data_Functor_Variant_functorVariantF')))->map;
-                    $bindImpl = (array_key_exists('Control_Monad_Free_bindImpl', $GLOBALS) ? $GLOBALS['Control_Monad_Free_bindImpl'] : \Control\Monad\Free\phpurs_eval_thunk('Control_Monad_Free_bindImpl'));
                     
                     $binds = $f->binds;
                     $cont = function($b) use ($freeObjClass, $binds) {

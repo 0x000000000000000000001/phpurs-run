@@ -1,0 +1,17 @@
+package:
+  name: "run"
+  dependencies:
+    - aff
+    - either
+    - free
+    - maybe
+    - newtype
+    - prelude
+    - tailrec
+    - tuples
+    - type-equality
+    - unsafe-coerce
+    - variant
+    - profunctor
+    - effect
+    - typelevel-prelude

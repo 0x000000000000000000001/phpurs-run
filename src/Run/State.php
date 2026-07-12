@@ -11,9 +11,9 @@ $_runStateAtImpl = function($symStr, $s = null, $r = null) use (&$_runStateAtImp
     }
     
     $runStateAtClosure = function($s_inner, $r_inner) use (&$runStateAtClosure, $symStr) {
-        $bindNodeClass = (array_key_exists('Control_Monad_Free_BindNode', $GLOBALS) ? $GLOBALS['Control_Monad_Free_BindNode'] : \Control\Monad\Free\phpurs_eval_thunk('Control_Monad_Free_BindNode'));
-        $bindLeafClass = (array_key_exists('Control_Monad_Free_BindLeaf', $GLOBALS) ? $GLOBALS['Control_Monad_Free_BindLeaf'] : \Control\Monad\Free\phpurs_eval_thunk('Control_Monad_Free_BindLeaf'));
-        $freeObjClass = (array_key_exists('Control_Monad_Free_FreeObj', $GLOBALS) ? $GLOBALS['Control_Monad_Free_FreeObj'] : \Control\Monad\Free\phpurs_eval_thunk('Control_Monad_Free_FreeObj'));
+        $bindNodeClass = \Control\Monad\Free\BindNode::class;
+        $bindLeafClass = \Control\Monad\Free\BindLeaf::class;
+        $freeObjClass = \Control\Monad\Free\FreeObj::class;
         $Tuple = (array_key_exists('Data_Tuple_Tuple', $GLOBALS) ? $GLOBALS['Data_Tuple_Tuple'] : \Data\Tuple\phpurs_eval_thunk('Data_Tuple_Tuple'));
 
         $f = $r_inner;

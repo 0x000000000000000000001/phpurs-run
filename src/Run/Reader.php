@@ -11,9 +11,9 @@ $_runReaderAtImpl = function($symStr, $e = null, $r = null) use (&$_runReaderAtI
     }
     
     $runReaderAtClosure = function($e_inner, $r_inner) use (&$runReaderAtClosure, $symStr) {
-        $bindNodeClass = (array_key_exists('Control_Monad_Free_BindNode', $GLOBALS) ? $GLOBALS['Control_Monad_Free_BindNode'] : \Control\Monad\Free\phpurs_eval_thunk('Control_Monad_Free_BindNode'));
-        $bindLeafClass = (array_key_exists('Control_Monad_Free_BindLeaf', $GLOBALS) ? $GLOBALS['Control_Monad_Free_BindLeaf'] : \Control\Monad\Free\phpurs_eval_thunk('Control_Monad_Free_BindLeaf'));
-        $freeObjClass = (array_key_exists('Control_Monad_Free_FreeObj', $GLOBALS) ? $GLOBALS['Control_Monad_Free_FreeObj'] : \Control\Monad\Free\phpurs_eval_thunk('Control_Monad_Free_FreeObj'));
+        $bindNodeClass = \Control\Monad\Free\BindNode::class;
+        $bindLeafClass = \Control\Monad\Free\BindLeaf::class;
+        $freeObjClass = \Control\Monad\Free\FreeObj::class;
 
         $f = $r_inner;
         while (true) {

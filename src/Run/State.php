@@ -60,8 +60,8 @@ $_runStateAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeO
                 if ($variantF->type === $symStr) {
                     // It is our state effect
                     $stateObj = $variantF->value;
-                    $t = $stateObj->v0;
-                    $k = $stateObj->v1;
+                    $t = $stateObj->value0;
+                    $k = $stateObj->value1;
                     $s_inner = $t($s_inner);
                     $b = $k($s_inner);
                     $f = new $freeObjClass(0, $b, $f->binds);

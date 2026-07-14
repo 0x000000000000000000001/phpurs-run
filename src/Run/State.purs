@@ -22,7 +22,6 @@ module Run.State
 
 import Prelude
 
-import Data.Either (Either(..))
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple(..), fst, snd)
 import Prim.Row as Row

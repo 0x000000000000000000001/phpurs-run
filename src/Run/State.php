@@ -76,7 +76,7 @@ $_runStateAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeO
                     $mappedVariantF = ($mapVariantF)($cont)($variantF);
                     $lifted = new $freeObjClass(1, $mappedVariantF, null);
                     
-                    $nextLoop = function($x) use (&$runStateAtClosure, $s_inner) {
+                    $nextLoop = function($x) use ($runStateAtClosure, $s_inner) {
                         return $runStateAtClosure($s_inner, $x);
                     };
                     

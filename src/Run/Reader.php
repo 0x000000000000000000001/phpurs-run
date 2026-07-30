@@ -2,13 +2,7 @@
 
 $exports = [];
 
-$_runReaderAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeObjClass = null, $bindImpl = null, $mapVariantF = null, $symStr = null, $e = null, $r = null) use (&$_runReaderAtImpl) {
-    if (func_num_args() < 8) {
-        $__args = func_get_args();
-        return function(...$more) use ($__args, &$_runReaderAtImpl) {
-            return $_runReaderAtImpl(...array_merge($__args, $more));
-        };
-    }
+$_runReaderAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF, $symStr, $e, $r) use (&$_runReaderAtImpl) {
     
     $runReaderAtClosure = function($e_inner, $r_inner) use (&$runReaderAtClosure, $symStr, $bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF) {
 
@@ -17,7 +11,7 @@ $_runReaderAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $free
             if ($f->tag === 0) { // Pure
                 $curr = $f->binds;
                 $stack = [];
-                $first = null;
+                $first;
                 
                 while ($curr !== null) {
                     if ($curr instanceof $bindLeafClass) {
@@ -33,7 +27,7 @@ $_runReaderAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $free
                     return new $freeObjClass(0, $f->valueOrFa, null);
                 }
 
-                $restBinds = null;
+                $restBinds;
                 foreach ($stack as $st) {
                     if ($restBinds === null) {
                         $restBinds = $st;
@@ -44,7 +38,7 @@ $_runReaderAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $free
 
                 $f2 = $first($f->valueOrFa);
                 
-                $newBinds = null;
+                $newBinds;
                 if ($f2->binds === null) {
                     $newBinds = $restBinds;
                 } else if ($restBinds === null) {

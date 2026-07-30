@@ -2,13 +2,7 @@
 
 $exports = [];
 
-$_runStateAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeObjClass = null, $bindImpl = null, $mapVariantF = null, $Tuple = null, $symStr = null, $s = null, $r = null) use (&$_runStateAtImpl) {
-    if (func_num_args() < 9) {
-        $__args = func_get_args();
-        return function(...$more) use ($__args, &$_runStateAtImpl) {
-            return $_runStateAtImpl(...array_merge($__args, $more));
-        };
-    }
+$_runStateAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF, $Tuple, $symStr, $s, $r) use (&$_runStateAtImpl) {
     
     $runStateAtClosure = function($s_inner, $r_inner) use (&$runStateAtClosure, $symStr, $bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF, $Tuple) {
 
@@ -17,7 +11,7 @@ $_runStateAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeO
             if ($f->tag === 0) { // Pure
                 $curr = $f->binds;
                 $stack = [];
-                $first = null;
+                $first;
                 
                 while ($curr !== null) {
                     if ($curr instanceof $bindLeafClass) {
@@ -33,7 +27,7 @@ $_runStateAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeO
                     return new $freeObjClass(0, $Tuple($s_inner)($f->valueOrFa), null);
                 }
 
-                $restBinds = null;
+                $restBinds;
                 foreach ($stack as $st) {
                     if ($restBinds === null) {
                         $restBinds = $st;
@@ -44,7 +38,7 @@ $_runStateAtImpl = function($bindNodeClass = null, $bindLeafClass = null, $freeO
 
                 $f2 = $first($f->valueOrFa);
                 
-                $newBinds = null;
+                $newBinds;
                 if ($f2->binds === null) {
                     $newBinds = $restBinds;
                 } else if ($restBinds === null) {

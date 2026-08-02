@@ -67,9 +67,7 @@ $_runReaderAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bin
                     $mappedVariantF = ($mapVariantF)($cont)($variantF);
                     $lifted = new $freeObjClass(1, $mappedVariantF, null);
                     
-                    $nextLoop = function($x) use ($runReaderAtClosure, $e_inner) {
-                        return $runReaderAtClosure($e_inner, $x);
-                    };
+                    $nextLoop = function($x) use ($runReaderAtClosure, $e_inner, $freeObjClass) { return $runReaderAtClosure($e_inner, new $freeObjClass(0, $x, null)); };
                     
                     return $bindImpl($lifted)($nextLoop);
                 }

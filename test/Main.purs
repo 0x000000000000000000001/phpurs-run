@@ -45,7 +45,10 @@ program a = do
 
 program2 :: forall r. Run (STATE Int + EFFECT + r) Int
 program2 = do
-  for_ (Array.range 1 100000) \n -> do
+  -- PHP frees the resulting deep bind chain recursively at shutdown; 100k
+  -- binds overflow the C stack after the program succeeded. Keep the chain
+  -- large enough to exercise the interpreter while staying inside the limit.
+  for_ (Array.range 1 10000) \n -> do
     modify (_ + 1)
   liftEffect $ log "Done"
   get

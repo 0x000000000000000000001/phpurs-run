@@ -11,7 +11,7 @@ $_runStateAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bind
             if ($f->tag === 0) { // Pure
                 $curr = $f->binds;
                 $stack = [];
-                $first;
+                $first = null;
                 
                 while ($curr !== null) {
                     if ($curr instanceof $bindLeafClass) {
@@ -27,7 +27,7 @@ $_runStateAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bind
                     return new $freeObjClass(0, $Tuple($s_inner)($f->valueOrFa), null);
                 }
 
-                $restBinds;
+                $restBinds = null;
                 foreach ($stack as $st) {
                     if ($restBinds === null) {
                         $restBinds = $st;
@@ -38,7 +38,7 @@ $_runStateAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bind
 
                 $f2 = $first($f->valueOrFa);
                 
-                $newBinds;
+                $newBinds = null;
                 if ($f2->binds === null) {
                     $newBinds = $restBinds;
                 } else if ($restBinds === null) {
@@ -70,7 +70,7 @@ $_runStateAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bind
                     $mappedVariantF = ($mapVariantF)($cont)($variantF);
                     $lifted = new $freeObjClass(1, $mappedVariantF, null);
                     
-                    $nextLoop = function($x) use ($runStateAtClosure, $s_inner, $freeObjClass) { return $runStateAtClosure($s_inner, new $freeObjClass(0, $x, null)); };
+                    $nextLoop = function($x) use ($runStateAtClosure, $s_inner) { return $runStateAtClosure($s_inner, $x); };
                     
                     return $bindImpl($lifted)($nextLoop);
                 }

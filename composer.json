@@ -1,0 +1,6 @@
+{
+    "name": "phpurs/run",
+    "require": {
+        "revolt/event-loop": "^1.0"
+    }
+}

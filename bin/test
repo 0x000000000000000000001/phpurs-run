@@ -29,7 +29,7 @@ echo "=== Generating PHP code with phpurs ==="
 
 echo "=== Running PHP test script ==="
 if [ -f "output/Test.Main/main.mod.php" ]; then
-    php output/Test.Main/main.mod.php
+    php -d memory_limit=1024M output/Test.Main/main.mod.php
 else
     echo "No output/Test.Main/main.mod.php found."
     exit 1

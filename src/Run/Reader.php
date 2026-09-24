@@ -11,7 +11,7 @@ $_runReaderAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bin
             if ($f->tag === 0) { // Pure
                 $curr = $f->binds;
                 $stack = [];
-                $first;
+                $first = null;
                 
                 while ($curr !== null) {
                     if ($curr instanceof $bindLeafClass) {
@@ -27,7 +27,7 @@ $_runReaderAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bin
                     return new $freeObjClass(0, $f->valueOrFa, null);
                 }
 
-                $restBinds;
+                $restBinds = null;
                 foreach ($stack as $st) {
                     if ($restBinds === null) {
                         $restBinds = $st;
@@ -38,9 +38,9 @@ $_runReaderAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bin
 
                 $f2 = $first($f->valueOrFa);
                 
-                $newBinds;
+                $newBinds = null;
                 if ($f2->binds === null) {
-                    $newBinds = $restBinds;
+                    $newBinds = $restBinds = null;
                 } else if ($restBinds === null) {
                     $newBinds = $f2->binds;
                 } else {
@@ -67,7 +67,7 @@ $_runReaderAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bin
                     $mappedVariantF = ($mapVariantF)($cont)($variantF);
                     $lifted = new $freeObjClass(1, $mappedVariantF, null);
                     
-                    $nextLoop = function($x) use ($runReaderAtClosure, $e_inner, $freeObjClass) { return $runReaderAtClosure($e_inner, new $freeObjClass(0, $x, null)); };
+                    $nextLoop = function($x) use ($runReaderAtClosure, $e_inner) { return $runReaderAtClosure($e_inner, $x); };
                     
                     return $bindImpl($lifted)($nextLoop);
                 }

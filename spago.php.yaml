@@ -112,8 +112,6 @@ workspace:
       path: "../phpurs-record"
     refs:
       path: "../phpurs-refs"
-    run:
-      path: "../phpurs-run"
     simple-json:
       path: "../phpurs-simple-json"
     spec:

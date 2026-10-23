@@ -2,80 +2,101 @@
 
 $exports = [];
 
-$_runReaderAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF, $symStr, $e, $r) use (&$_runReaderAtImpl) {
-    
-    $runReaderAtClosure = function($e_inner, $r_inner) use (&$runReaderAtClosure, $symStr, $bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF) {
-
-        $f = $r_inner;
+$_runReaderAtImpl = function (
+    $bindNodeClass,
+    $bindLeafClass,
+    $freeObjClass,
+    $bindImpl,
+    $mapVariantF,
+    $effectLabel,
+    $environment,
+    $computation,
+) {
+    $runReaderAtClosure = function ($environment, $computation) use (
+        &$runReaderAtClosure,
+        $effectLabel,
+        $bindNodeClass,
+        $bindLeafClass,
+        $freeObjClass,
+        $bindImpl,
+        $mapVariantF,
+    ) {
+        $current = $computation;
         while (true) {
-            if ($f->tag === 0) { // Pure
-                $curr = $f->binds;
+            if ($current->tag === 0) {
+                // Pure
+                // Visit the leftmost continuation, retaining right branches.
+                $bindTree = $current->binds;
                 $stack = [];
-                $first = null;
-                
-                while ($curr !== null) {
-                    if ($curr instanceof $bindLeafClass) {
-                        $first = $curr->k;
+                $continuation = null;
+
+                while ($bindTree !== null) {
+                    if ($bindTree instanceof $bindLeafClass) {
+                        $continuation = $bindTree->k;
                         break;
-                    } else if ($curr instanceof $bindNodeClass) {
-                        $stack[] = $curr->right;
-                        $curr = $curr->left;
+                    } elseif ($bindTree instanceof $bindNodeClass) {
+                        $stack[] = $bindTree->right;
+                        $bindTree = $bindTree->left;
                     }
                 }
-                
-                if ($first === null) {
-                    return new $freeObjClass(0, $f->valueOrFa, null);
+
+                if ($continuation === null) {
+                    return new $freeObjClass(0, $current->valueOrFa, null);
                 }
 
                 $restBinds = null;
-                foreach ($stack as $st) {
+                foreach ($stack as $bindSubtree) {
                     if ($restBinds === null) {
-                        $restBinds = $st;
+                        $restBinds = $bindSubtree;
                     } else {
-                        $restBinds = new $bindNodeClass($st, $restBinds);
+                        $restBinds = new $bindNodeClass($bindSubtree, $restBinds);
                     }
                 }
 
-                $f2 = $first($f->valueOrFa);
-                
-                $newBinds = null;
-                if ($f2->binds === null) {
-                    $newBinds = $restBinds = null;
-                } else if ($restBinds === null) {
-                    $newBinds = $f2->binds;
+                $next = $continuation($current->valueOrFa);
+
+                if ($next->binds === null) {
+                    $newBinds = $restBinds;
+                } elseif ($restBinds === null) {
+                    $newBinds = $next->binds;
                 } else {
-                    $newBinds = new $bindNodeClass($f2->binds, $restBinds);
+                    $newBinds = new $bindNodeClass($next->binds, $restBinds);
                 }
-                
-                $f = new $freeObjClass($f2->tag, $f2->valueOrFa, $newBinds);
+
+                $current = new $freeObjClass($next->tag, $next->valueOrFa, $newBinds);
             } else {
                 // Lift
-                $variantF = $f->valueOrFa;
-                if ($variantF->type === $symStr) {
+                $variantF = $current->valueOrFa;
+                if ($variantF->type === $effectLabel) {
                     // Reader
-                    $k = $variantF->value;
-                    $b = $k($e_inner);
-                    $f = new $freeObjClass(0, $b, $f->binds);
+                    $readEnvironment = $variantF->value;
+                    $value = $readEnvironment($environment);
+                    $current = new $freeObjClass(0, $value, $current->binds);
                 } else {
                     // Another effect
-                    
-                    $binds = $f->binds;
-                    $cont = function($b) use ($freeObjClass, $binds) {
-                        return new $freeObjClass(0, $b, $binds);
+
+                    $binds = $current->binds;
+                    $resume = function ($value) use ($freeObjClass, $binds) {
+                        return new $freeObjClass(0, $value, $binds);
                     };
-                    
-                    $mappedVariantF = ($mapVariantF)($cont)($variantF);
+
+                    $mappedVariantF = $mapVariantF($resume)($variantF);
                     $lifted = new $freeObjClass(1, $mappedVariantF, null);
-                    
-                    $nextLoop = function($x) use ($runReaderAtClosure, $e_inner) { return $runReaderAtClosure($e_inner, $x); };
-                    
+
+                    $nextLoop = function ($nextComputation) use (
+                        $runReaderAtClosure,
+                        $environment,
+                    ) {
+                        return $runReaderAtClosure($environment, $nextComputation);
+                    };
+
                     return $bindImpl($lifted)($nextLoop);
                 }
             }
         }
     };
-    
-    return $runReaderAtClosure($e, $r);
+
+    return $runReaderAtClosure($environment, $computation);
 };
 
 $exports['runReaderAtImpl'] = $_runReaderAtImpl;

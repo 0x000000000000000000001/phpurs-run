@@ -1,10 +1,19 @@
 # phpurs-run
 
+> PHPurs checkout: see the [PHP library development guide](https://github.com/0x000000000000000000001/phpurs/blob/main/docs/libraries.md) for the TAST toolchain, FFI conventions and validation commands. Run `./bin/test` from this package with the PHP toolchain prepared.
+
 [![Latest release](http://img.shields.io/github/release/natefaubion/purescript-run.svg)](https://github.com/natefaubion/purescript-run/releases)
 [![Build status](https://github.com/natefaubion/purescript-run/workflows/CI/badge.svg?branch=master)](https://github.com/natefaubion/purescript-run/actions?query=workflow%3ACI+branch%3Amaster)
 
 An [extensible-effects](https://hackage.haskell.org/package/extensible-effects)
 implementation for PureScript.
+
+
+## PHP runtime development
+
+The PHP FFI for the optimized Reader and State interpreters lives in `src/Run/Reader.php` and `src/Run/State.php`. Each interpreter walks the continuation tree iteratively, handles its own effect label and forwards other effects with a continuation that resumes the interpreter. The constructor classes and `bindImpl` are supplied by PureScript.
+
+Keep runtime helpers in their FFI file: the compiler embeds that source in generated modules and bundles. When modifying continuation handling, check both interpreters and preserve the order of the retained branches, including when a continuation returns a value without its own pending binds. Run `php test/ffi.php` for direct continuation checks and `bin/test` for the complete PureScript-to-PHP suite.
 
 ## Install
 

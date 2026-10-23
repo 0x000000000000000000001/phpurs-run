@@ -2,83 +2,103 @@
 
 $exports = [];
 
-$_runStateAtImpl = function($bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF, $Tuple, $symStr, $s, $r) use (&$_runStateAtImpl) {
-    
-    $runStateAtClosure = function($s_inner, $r_inner) use (&$runStateAtClosure, $symStr, $bindNodeClass, $bindLeafClass, $freeObjClass, $bindImpl, $mapVariantF, $Tuple) {
-
-        $f = $r_inner;
+$_runStateAtImpl = function (
+    $bindNodeClass,
+    $bindLeafClass,
+    $freeObjClass,
+    $bindImpl,
+    $mapVariantF,
+    $Tuple,
+    $effectLabel,
+    $state,
+    $computation,
+) {
+    $runStateAtClosure = function ($state, $computation) use (
+        &$runStateAtClosure,
+        $effectLabel,
+        $bindNodeClass,
+        $bindLeafClass,
+        $freeObjClass,
+        $bindImpl,
+        $mapVariantF,
+        $Tuple,
+    ) {
+        $current = $computation;
         while (true) {
-            if ($f->tag === 0) { // Pure
-                $curr = $f->binds;
+            if ($current->tag === 0) {
+                // Pure
+                // Visit the leftmost continuation, retaining right branches.
+                $bindTree = $current->binds;
                 $stack = [];
-                $first = null;
-                
-                while ($curr !== null) {
-                    if ($curr instanceof $bindLeafClass) {
-                        $first = $curr->k;
+                $continuation = null;
+
+                while ($bindTree !== null) {
+                    if ($bindTree instanceof $bindLeafClass) {
+                        $continuation = $bindTree->k;
                         break;
-                    } else if ($curr instanceof $bindNodeClass) {
-                        $stack[] = $curr->right;
-                        $curr = $curr->left;
+                    } elseif ($bindTree instanceof $bindNodeClass) {
+                        $stack[] = $bindTree->right;
+                        $bindTree = $bindTree->left;
                     }
                 }
-                
-                if ($first === null) {
-                    return new $freeObjClass(0, $Tuple($s_inner)($f->valueOrFa), null);
+
+                if ($continuation === null) {
+                    return new $freeObjClass(0, $Tuple($state)($current->valueOrFa), null);
                 }
 
                 $restBinds = null;
-                foreach ($stack as $st) {
+                foreach ($stack as $bindSubtree) {
                     if ($restBinds === null) {
-                        $restBinds = $st;
+                        $restBinds = $bindSubtree;
                     } else {
-                        $restBinds = new $bindNodeClass($st, $restBinds);
+                        $restBinds = new $bindNodeClass($bindSubtree, $restBinds);
                     }
                 }
 
-                $f2 = $first($f->valueOrFa);
-                
-                $newBinds = null;
-                if ($f2->binds === null) {
+                $next = $continuation($current->valueOrFa);
+
+                if ($next->binds === null) {
                     $newBinds = $restBinds;
-                } else if ($restBinds === null) {
-                    $newBinds = $f2->binds;
+                } elseif ($restBinds === null) {
+                    $newBinds = $next->binds;
                 } else {
-                    $newBinds = new $bindNodeClass($f2->binds, $restBinds);
+                    $newBinds = new $bindNodeClass($next->binds, $restBinds);
                 }
-                
-                $f = new $freeObjClass($f2->tag, $f2->valueOrFa, $newBinds);
+
+                $current = new $freeObjClass($next->tag, $next->valueOrFa, $newBinds);
             } else {
                 // Lift
-                $variantF = $f->valueOrFa;
-                if ($variantF->type === $symStr) {
+                $variantF = $current->valueOrFa;
+                if ($variantF->type === $effectLabel) {
                     // It is our state effect
                     $stateObj = $variantF->value;
-                    $t = $stateObj->value0;
-                    $k = $stateObj->value1;
-                    $s_inner = $t($s_inner);
-                    $b = $k($s_inner);
-                    $f = new $freeObjClass(0, $b, $f->binds);
+                    $updateState = $stateObj->value0;
+                    $readState = $stateObj->value1;
+                    $state = $updateState($state);
+                    $value = $readState($state);
+                    $current = new $freeObjClass(0, $value, $current->binds);
                 } else {
                     // Another effect
-                    
-                    $binds = $f->binds;
-                    $cont = function($b) use ($freeObjClass, $binds) {
-                        return new $freeObjClass(0, $b, $binds);
+
+                    $binds = $current->binds;
+                    $resume = function ($value) use ($freeObjClass, $binds) {
+                        return new $freeObjClass(0, $value, $binds);
                     };
-                    
-                    $mappedVariantF = ($mapVariantF)($cont)($variantF);
+
+                    $mappedVariantF = $mapVariantF($resume)($variantF);
                     $lifted = new $freeObjClass(1, $mappedVariantF, null);
-                    
-                    $nextLoop = function($x) use ($runStateAtClosure, $s_inner) { return $runStateAtClosure($s_inner, $x); };
-                    
+
+                    $nextLoop = function ($nextComputation) use ($runStateAtClosure, $state) {
+                        return $runStateAtClosure($state, $nextComputation);
+                    };
+
                     return $bindImpl($lifted)($nextLoop);
                 }
             }
         }
     };
-    
-    return $runStateAtClosure($s, $r);
+
+    return $runStateAtClosure($state, $computation);
 };
 
 $exports['runStateAtImpl'] = $_runStateAtImpl;
